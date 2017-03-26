@@ -1,0 +1,62 @@
+version: "3"
+
+networks:
+  cruize_nw:
+    driver: bridge
+
+services:
+  cruize_sql:
+    image: vera/cruize_sql
+    #build:
+    #  context: ./cruize_sql
+    container_name: cruize_sql
+    env_file:
+    - browser_config
+# uncomment the next two lines to allow others to access the db
+#    ports:
+#    - "3306:3306"
+    volumes:
+      # change the next line to mount a different host directory for the mysql data dir
+    - ./sql:/var/lib/mysql
+    - ./cruize_scripts:/usr/local/bin
+    networks:
+    - cruize_nw
+  cruize_www:
+    image: vera/cruize_www
+    #build:
+    #  context: ./cruize_www
+    container_name: cruize_www
+    env_file:
+    - browser_config
+    ports:
+    - "80:80"
+    - "443:443"
+    volumes:
+    - ./gbdb:/gbdb:ro
+    - ./cruize_scripts:/usr/local/bin
+    networks:
+    - cruize_nw
+  cruize_admin:
+    image: vera/cruize_admin
+    container_name: cruize_admin
+    env_file:
+    - browser_config
+    volumes:
+    - ./gbdb:/gbdb:rw
+    networks:
+    - cruize_nw
+    depends_on:
+    - cruize_www
+    - cruize_sql
+# UNCOMMENT BELOW TO ENABLE BLAT ON THE SAME HOST RUNNING THE BROWSER
+#   MAKE SURE YOU HAVE ENOUGH RAM ON HOST (>500MByte/GBase for DNA, >1GB/GBase for Protein )
+  # blat:
+  #   build: ./start_blatserver
+  #   environment: browser_config
+  #   ports: "10000:10000"
+
+# volumes:
+#   gbdb:
+#     external: true
+#   sqldb:
+#     external: true
