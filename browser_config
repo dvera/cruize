@@ -28,17 +28,17 @@ DOMAIN=HTTPHOST
 
 # FQDN defines the domain(s) used for the ssl certificate.
 # Setting this to "none" will cause cruize to skip obtaining an ssl certificate
-FQDN=gataca.io
+FQDN=genomaize.us
 
 # WIKIEMAIL is used as the return email address for WIKI account creation
 #  confirmation emails. Setting this to NOEMAIL will skip email validation.
 WIKIEMAIL=NOEMAIL
 
 # BROWSERNAME defines the title of host of browser shown in the user interface
-BROWSERNAME=cruize_browser
+BROWSERNAME=genomaize
 
 # EMAILADDRESS sets the administrator email for suggestions and other pages
-EMAILADDRESS=user@host.com
+EMAILADDRESS=vera@genomics.fsu.edu
 
 # DEFAULTGENOME sets the genome loaded when users go straight to the browser
-DEFAULTGENOME=someGenome
+DEFAULTGENOME=Zea mays

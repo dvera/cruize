@@ -32,22 +32,23 @@ services:
     - "80:80"
     - "443:443"
     volumes:
-    - ./gbdb:/gbdb:ro
+    - /lustre/genomaize/gbdb:/gbdb:ro
     - ./cruize_scripts:/usr/local/bin
     networks:
     - cruize_nw
+    depends_on:
+    - cruize_sql
   cruize_admin:
     image: vera/cruize_admin
     container_name: cruize_admin
     env_file:
     - browser_config
     volumes:
-    - ./gbdb:/gbdb:rw
+    - ./lustre/genomaize/gbdb:/gbdb:rw
     networks:
     - cruize_nw
     depends_on:
     - cruize_www
-    - cruize_sql
 # UNCOMMENT BELOW TO ENABLE BLAT ON THE SAME HOST RUNNING THE BROWSER
 #   MAKE SURE YOU HAVE ENOUGH RAM ON HOST (>500MByte/GBase for DNA, >1GB/GBase for Protein )
   # blat:
@@ -55,8 +56,9 @@ services:
   #   environment: browser_config
   #   ports: "10000:10000"
 
-# volumes:
-#   gbdb:
-#     external: true
-#   sqldb:
-#     external: true
+#volumes:
+#  gbdb:
+#    external: true
+#    driver: nfs
+#  sql:
+#    external: true
