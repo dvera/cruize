@@ -127,6 +127,24 @@ runcmd:
   - cd /root/cruize && docker-compose up
 ```
 
+to run blat from a different computer without using docker:
+```bash
+
+# download gfServer if you don't already have (url to gfServer below assumes x86_64 architecture)
+mkdir -p ~/cruize/bin/
+curl -so ~/cruize/bin/gfServer http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/gfServer
+chmod +x ~/cruize/bin/gfServer
+export PATH=${HOME}/cruize/bin:$PATH
+
+# define your google spreadsheet ID
+export DBDBID=1ilMW4gv8XsECFuKpSlOFWVhO_04qiogVdQHYYxQF2ZM
+
+# define browser URL/IP
+export FQDN=genomaize.us
+
+bash <(curl -s https://raw.githubusercontent.com/FSUgenomics/cruize_scripts/master/start_blat_dockerless)
+
+```
 ## customize
 
 when cruize is first started, it checks to see if there is an existing database and genome data files, and downloads some example data if not. refer to the [docs](http://dvera.github.io/cruize) to customize cruize.
