@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+
+# make dbDb table
+echo "preparing dbDb"
+awk -F '\t' -v header=name,description,nibPath,organism,defaultPos,active,orderKey,genome,scientificName,htmlPath,hgNearOk,hgPbOk,sourceName  '
+BEGIN {
+  split(header,cols,",")
+}
+{
+  if(NR==1){
+    for (i=1; i<=NF; i++){cols[$i]=i}
+  }
+  if(NR>=1){
+    print $cols["name"], $cols["description"], $cols["nibPath"], $cols["organism"], $cols["defaultPos"], $cols["active"], $cols["orderKey"], $cols["genome"], $cols["scientificName"], $cols["htmlPath"],  $cols["hgNearOk"], $cols["hgPbOk"], $cols["sourceName"]
+  }
+}' OFS='\t' /tmp/dbDb.tsv > /tmp/dbDb2.tsv
+hgsql -e "delete from hgcentral.dbDb"
+hgsql -e "load data local infile \"/tmp/dbDb2.tsv\" into table hgcentral.dbDb ignore 1 lines;"

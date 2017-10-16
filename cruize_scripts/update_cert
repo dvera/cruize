@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+
+
+if [[ $FQDN == *"."* ]]; then
+
+  if pgrep -x "httpd" > /dev/null; then
+    "APACHE ALREADY RUNNING"
+  else
+    "APACHE NOT RUNNING, STARTING..."
+    apachectl
+    sleep 2
+  fi
+
+  sed -i 's/^#ServerName/ServerName/g' /etc/httpd/conf.d/ssl.conf
+  sed -i 's/^#SSLCertificateChainFile/SSLCertificateChainFile/g' /etc/httpd/conf.d/ssl.conf
+  sed -i 's/^#ServerName/ServerName/g' /etc/httpd/conf/httpd.conf
+  sed -i 's/^ServerName .*/ServerName '"$FQDN"'/g' /etc/httpd/conf.d/ssl.conf
+  sed -i 's/^ServerName .*/ServerName '"$FQDN"'/g' /etc/httpd/conf/httpd.conf
+
+  certbot certonly --webroot -n --webroot-path /var/www --preferred-challenges http-01 -d $FQDN -m vera@genomics.fsu.edu --agree-tos
+  certExitStatus=$?
+  if [ $certExitStatus -eq 0 ]; then
+    KEYLOC=/etc/letsencrypt/live/${FQDN}/privkey.pem
+    CRTLOC=/etc/letsencrypt/live/${FQDN}/cert.pem
+    CHNLOC=/etc/letsencrypt/live/${FQDN}/chain.pem
+    ln -fs $KEYLOC /etc/pki/tls/private/key.pem
+    ln -fs $CRTLOC /etc/pki/tls/private/crt.pem
+    ln -fs $CHNLOC /etc/pki/tls/private/chn.pem
+
+    sed -i 's#^SSLCertificateFile .*#SSLCertificateFile /etc/pki/tls/private/crt\.pem#g' /etc/httpd/conf.d/ssl.conf
+    sed -i 's#^SSLCertificateKeyFile .*#SSLCertificateKeyFile /etc/pki/tls/private/key\.pem#g' /etc/httpd/conf.d/ssl.conf
+    sed -i 's#^SSLCertificateChainFile .*#SSLCertificateChainFile /etc/pki/tls/private/chn\.pem#g' /etc/httpd/conf.d/ssl.conf
+
+    #force https
+    #echo -e 'RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]' >> /etc/httpd/conf/httpd.conf
+
+    apachectl -k graceful-stop
+    sleep 2
+    apachectl
+  #APID=$(ps -C httpd | awk 'NR==2{print $1}')
+  else
+    echo "OBTAINING SSL CERTIFICATE FAILED!!!!!"
+  fi
+
+else
+  echo "NO FQDN SPECIFIED FOR SSL"
+fi

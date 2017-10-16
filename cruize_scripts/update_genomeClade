@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+# make genomeClade table
+echo "preparing genomeClade"
+awk -F '\t' '
+NR==1 {
+  for (i=1; i<=NF; i++){
+    ix[$i]=i
+  }
+  print "genome","clade","priority"}
+NR>1  {
+  if(!($ix["organism"] in p && $ix["active"]==1)) {
+    print $ix["organism"], $ix["clade"], NR
+    p[$ix["organism"]]=$ix["organism"]
+  }
+}' OFS='\t' /tmp/dbDb.tsv > /tmp/genomeClade.tsv
+hgsql -e "delete from hgcentral.genomeClade"
+hgsql -e "load data local infile \"/tmp/genomeClade.tsv\" into table hgcentral.genomeClade ignore 1 lines;"

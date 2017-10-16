@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+echo -e 'db.host='${SQL_HOST}'\ndb.user='${SQL_USER}'\ndb.password='${SQL_PASSWORD} > /root/.hg.conf
+chmod 600 /root/.hg.conf

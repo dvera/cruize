@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+
+echo "starting browser refresh..."
+
+update_perms
+get_gbdb
+get_dbdb
+
+until hgsql -e "show databases;"
+do
+  echo "Attempting to connect to database"
+  sleep 5
+done
+
+update_dbDb
+update_clade
+update_defaultDb
+update_genomeClade
+update_blatServers
+update_genomes
+update_liftOverChain
+
+
+# clear hgcentral
+echo "deleting disposable hgcentral tables"
+hgsql -e "delete from hgcentral.dbDbArch"
+hgsql -e "delete from hgcentral.hubPublic"
+hgsql -e "delete from hgcentral.targetDb"
+#hgsql -e "delete from hgcentral.hubStatus"

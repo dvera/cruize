@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# make defaultDb table
+echo "preparing defaultDb"
+awk -F '\t' '
+NR==1 {
+  for (i=1; i<=NF; i++){
+    ix[$i]=i
+  }
+  print "genome","name"
+}
+NR>1  {
+  if(!($ix["organism"] in p)) {
+    print $ix["organism"], $ix["name"]
+    p[$ix["organism"]]=$ix["organism"]
+  }
+}' OFS='\t' /tmp/dbDb.tsv > /tmp/defaultDb.tsv
+hgsql -e "delete from hgcentral.defaultDb"
+hgsql -e "load data local infile \"/tmp/defaultDb.tsv\" into table hgcentral.defaultDb ignore 1 lines;"

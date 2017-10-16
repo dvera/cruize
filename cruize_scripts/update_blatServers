@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+echo "preparing blatServers"
+awk -F '\t'  '
+NR==1 {
+  for (i=1; i<=NF; i++){
+    ix[$i]=i
+  }
+  print "db","host","port","isTrans","canPcr"}
+NR>1  {
+  if( $ix["nBlatHost"] != "NA" && $ix["active"]==1) {
+    print $ix["name"], $ix["nBlatHost"], $ix["nBlatPort"], 0, 1
+  }
+  if( $ix["pBlatHost"] != "NA" && $ix["active"]==1) {
+    print $ix["name"], $ix["pBlatHost"], $ix["pBlatPort"], 1, 0
+  }
+}' OFS='\t' /tmp/dbDb.tsv > /tmp/blatServers.tsv
+hgsql -e "delete from hgcentral.blatServers"
+hgsql -e "load data local infile \"/tmp/blatServers.tsv\" into table hgcentral.blatServers ignore 1 lines;"

@@ -1,0 +1,38 @@
+#!/bin/bash
+
+pkill gfServer || :
+
+echo "downloading dbDb spreadsheet from https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key="$DBDBID"&hl=en&exportFormat=tsv"
+curl -sL "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key="$DBDBID"&hl=en&exportFormat=tsv" | \
+  tr -d "\r" | \
+  awk -F '\t' -v header=active  '
+  BEGIN {
+    split(header,cols,",")
+  }
+  {
+    if(NR==1){
+      for (i=1; i<=NF; i++){cols[$i]=i}
+      print $0
+    }
+    if(NR>1 && $cols["active"]==1){
+      print $0
+    }
+  }' OFS='\t' > /tmp/dbDb.tsv
+echo "found" $(grep -v "^name" /tmp/dbDb.tsv | wc -l) "activated genomes"
+
+echo "processing genomes"
+cols=$(head -n 1 /tmp/dbDb.tsv)
+tail -n+2 /tmp/dbDb.tsv | while IFS=$'\t' read -r $cols
+do
+  if [ $active -eq 1 ]; then
+    if [[ $(hostname) == $nBlatHost ]] && [[ $nBlatPort != "NA" ]]; then
+      echo "starting nucleotide blat service for $name"
+      gfServer -tileSize=7 -canStop start $(hostname).$DOMAIN $nBlatPort -stepSize=5 $nibPath/genome.2bit &
+    fi
+
+    if [[ $(hostname) == $pBlatHost ]] && [[ $pBlatPort != "NA" ]]; then
+      echo "starting protein blat service for $name"
+      gfServer -trans -canStop start $(hostname).$DOMAIN $pBlatPort $nibPath/genome.2bit &
+    fi
+  fi
+done

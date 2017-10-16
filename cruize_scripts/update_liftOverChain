@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+mkdir -p /gbdb/liftOver
+
+if [ "$(ls -A /gbdb/liftOver)" ]; then
+
+  for i in $(ls -1 /gbdb/liftOver/*.chain.gz); do
+    j=$(basename $i)
+    k=$(echo $j  | sed -nr 's/^(.*)_to_(.*)\.chain\.gz/\1\t\2/p')
+    echo -e "$k\t$i\t0.95\t0\t0\tN\t1\tN"
+  done > /tmp/liftOverChain.tsv
+
+  hgsql -e "delete from hgcentral.liftOverChain"
+  hgsql -e "load data local infile \"/tmp/liftOverChain.tsv\" into table hgcentral.liftOverChain;"
+else
+  echo "No liftover chain files found"
+fi

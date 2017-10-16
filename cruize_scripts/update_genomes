@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# drop all genome databases
+hgsql -e "show databases" | \
+ grep -v "Database\|mysql\|information_schema\|customTrash\|hgFixed\|hgcentral\|performance_schema\|test" | \
+ awk '{print "drop database " $1 ";select sleep(0.1);"}' | \
+ hgsql
+
+echo "processing genomes"
+cols=$(head -n 1 /tmp/dbDb.tsv)
+tail -n+2 /tmp/dbDb.tsv | while IFS=$'\t' read -r $cols
+do
+  if [ $gid != "NA" ] && [ $active -eq 1 ]; then
+
+    echo "<h2>Summary</h2> $summary <hr>" >  $htmlPath
+    echo "<h2>Credits</h2> $credits <hr>" >> $htmlPath
+    ln -sf /gbdb $nibDir/gbdb # to address a bug where web blat looks for gbdb in nibDir
+
+    echo "- $name"
+    echo "  - creating core genome tables"
+    hgsql -e "create database $name"
+    hgsql $name < /opt/kent/src/hg/lib/chromInfo.sql
+    hgsql $name < /opt/kent/src/hg/lib/grp.sql
+    hgsql $name < /opt/kent/src/hg/lib/gap.sql
+    hgsql -e "load data local infile \"$nibPath/chromInfo.tab\" into table $name.chromInfo;"
+    hgLoadSqlTab $name cytoBandIdeo /opt/kent/src/hg/lib/cytoBandIdeo.sql $nibPath/cytoband.bed
+
+    #######################################
+    ### PROCESS TRACKS ####################
+    #######################################
+    echo "  - downloading trackDb spreadsheet"
+    curl -sL "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key="$gid"&hl=en&exportFormat=tsv" |\
+      tr -d "\r" | sed 's/^\t/NA\t/g' | sed 's/\t$/\tNA/g' | sed 's/\t\t/\tNA\t/g' > $nibPath/trackDb.tsv && echo "" >> $nibPath/trackDb.tsv
+
+    echo "  - deleting html files"
+    rm -fr $nibPath/html
+
+    # loop through each track
+    echo "  - processing tracks"
+    tcols=$(head -n 1 $nibPath/trackDb.tsv)
+    tail -n+2 $nibPath/trackDb.tsv | while IFS=$'\t' read -r $tcols
+    do
+      echo "      - $track"
+      if [[ $bigDataUrl != "NA" ]] && [[ ${_on} -eq 1 ]]; then
+
+        if [[ ! $bigDataUrl =~ ":" ]] && [[ ! -f $bigDataUrl ]]; then
+          echo "WARNING: $bigDataUrl DOES NOT EXIST for track $track"
+        fi
+
+        type2=$(echo $type | cut -d' ' -f1)
+
+        case $type2 in
+          bigWig|bigBed|bam|vcfTabix)
+            hgBbiDbLink $name $track $bigDataUrl
+            ;;
+          bed)
+            #type3=$(echo $type | tr -d ' ')
+            if [[ -z ${_asPath} ]] || [[ ${_asPath} == "NA" ]] || [[ -z ${_sqlTablePath} ]] || [[ ${_sqlTablePath} == "NA" ]]; then
+          
+                   hgLoadBed -tab $name $track $bigDataUrl
+            else
+                   hgLoadBed -tab -as=${_asPath} -sqlTable=${_sqlTablePath} -renameSqlTable $name $track $bigDataUrl
+            fi 
+            ;;
+          bedDetail)
+            hgLoadBed -bedDetail -tab -as=${_asPath} -sqlTable=${_sqlTablePath} -renameSqlTable $name $track $bigDataUrl
+            ;;
+          genePred)
+            hgLoadGenePred $name $track $bigDataUrl
+            ;;
+        esac
+
+      fi
+
+      mkdir -p $nibPath/html
+      #if [ "$html" != "NA" ]; then
+        echo "<h2>Credits</h2> $_credits <hr>" > /gbdb/$name/${html}.html
+        echo "<h2>Methods</h2> $_methods <hr>" >> /gbdb/$name/${html}.html
+      #fi
+    done
+
+    #######################################
+
+
+    # create track database file from spreadsheet
+    awk -F "\t" '{if(NR==1){split($0,xx,"\t"); nf=NF} ; if(NR>1 && $1==1){for (i = 1; i <= nf; i++) print xx[i]" "$i; print ""  }}' \
+      $nibPath/trackDb.tsv | grep -v " NA$" | grep -v "^_" > $nibPath/trackDb.ra
+    hgFindSpec $nibPath $name hgFindSpec /opt/kent/src/hg/lib/hgFindSpec.sql $nibPath
+    hgTrackDb $nibPath $name trackDb /opt/kent/src/hg/lib/trackDb.sql $nibPath
+    hgsql -e "GRANT SELECT on $name.* TO readonly@'172.%.%.%' IDENTIFIED BY 'access';"
+    hgsql -e "GRANT ALL PRIVILEGES on *.* TO root@'172.%.%.%' IDENTIFIED BY '"${SQL_PASSWORD}"' WITH GRANT OPTION;" mysql
+
+  fi
+done
+
+hgsql -e "FLUSH PRIVILEGES;"

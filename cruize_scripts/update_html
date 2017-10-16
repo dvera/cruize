@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+
+get_dbdb
+
+grep 'tools1' -A 1 -B 50  /var/www/inc/globalNavBar.inc > /var/www/inc/globalNavBar.tmp
+
+echo "processing genomes"
+cols=$(head -n 1 /tmp/dbDb.tsv)
+tail -n+2 /tmp/dbDb.tsv | while IFS=$'\t' read -r $cols
+do
+  if [ $gid != "NA" ] && [ $active -eq 1 ]; then
+
+    echo "<li><a href=\"../cgi-bin/hgTracks?db=$name&amp;position=lastDbPos\">$genome ($description)</a]</li>"
+  fi
+done | tac | sed '0,/<li>/s/<li>/<li class="last">/' | tac | sed '0,/<li>/s/<li>/<li class="first">/'  >> /var/www/inc/globalNavBar.tmp
+
+echo "<li class=\"last\"><a href=\"../cgi-bin/hgGateway\">Other</a></li>" >> /var/www/inc/globalNavBar.tmp
+echo "</ul></li>" >> /var/www/inc/globalNavBar.tmp
+
+grep 'tools2' -A 1000   /var/www/inc/globalNavBar.inc >> /var/www/inc/globalNavBar.tmp
+
+rm -f /var/www/inc/globalNavBar.incb
+
+cp /var/www/inc/globalNavBar.inc /var/www/inc/globalNavBar.incb
+rm -f /var/www/inc/globalNavBar.inc
+mv /var/www/inc/globalNavBar.tmp /var/www/inc/globalNavBar.inc
+
+sed -i '/<!-- hgwdev warning/,/endif -->/d' /var/www/index.html
+sed -i '/<!-- genome-preview warning/,/endif -->/d' /var/www/index.html

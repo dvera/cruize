@@ -1,0 +1,51 @@
+#!/bin/bash
+
+if [ "$(ls -A /var/lib/mysql)" ]; then
+  if pgrep "mysqld" > /dev/null; then
+    echo "mysqld is running"
+    mysqlcheck -u root password ${SQL_PASSWORD} -A --auto-repair
+  else
+    echo "mysqld not running, starting..."
+    mysqld_safe & sleep 5
+    mysqlcheck -u root password ${SQL_PASSWORD} -A --auto-repair
+
+  fi
+else
+  echo "no mysql database found, initiating..."
+
+  echo -e '[mysqld]\n'\
+  'user                   =mysql\n'\
+  'datadir                =/var/lib/mysql\n'\
+  'symbolic-links         =1\n'\
+  'loose-local-infile     =1\n'\
+  'default-storage-engine =MYISAM\n'\
+  '[mysqld_safe]\n'\
+  'log-error              =/var/log/mariadb/mariadb.log\n'\
+  'pid-file               =/var/run/mariadb/mariadb.pid\n'\
+  'socket                 =/var/lib/mysql/mysql.sock\n'\
+   > /etc/my.cnf
+
+
+  # setup mysql database and root account
+  mysql_install_db --user=mysql
+  mysqld_safe --local-infile=1 & sleep 5
+  mysqladmin -u root password ${SQL_PASSWORD}
+  
+  # setup minimum browser tables
+  mysql -uroot -p${SQL_PASSWORD} -e "create database hgFixed"
+  mysql -uroot -p${SQL_PASSWORD} -e "create database hgcentral"
+  mysql -uroot -p${SQL_PASSWORD} -e "create database customTrash"
+  curl -so /var/lib/mysql/hgcentral.sql http://hgdownload.cse.ucsc.edu/admin/hgcentral.sql
+  mysql -uroot -p${SQL_PASSWORD} hgcentral < /var/lib/mysql/hgcentral.sql
+  chown -R mysql:mysql /var/lib/mysql
+
+  mysql -uroot -p${SQL_PASSWORD} -e "GRANT ALL PRIVILEGES on *.* TO root@'172.%.%.%' IDENTIFIED BY '"${SQL_PASSWORD}"' WITH GRANT OPTION;" mysql
+  mysql -uroot -p${SQL_PASSWORD} -e "GRANT SELECT on hgFixed.* TO readonly@'172.%.%.%' IDENTIFIED BY 'access';" mysql
+  mysql -uroot -p${SQL_PASSWORD} -e "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER on hgcentral.* TO readwrite@'172.%.%.%' IDENTIFIED BY 'update';" mysql
+  mysql -uroot -p${SQL_PASSWORD} -e "GRANT SELECT,INSERT,UPDATE,DELETE,CREATE,DROP,ALTER,INDEX on customTrash.* TO readwrite@'172.%.%.%' IDENTIFIED by 'update';" mysql
+  mysql -uroot -p${SQL_PASSWORD} -e "FLUSH PRIVILEGES;"
+
+fi
+
+
+tail -f /var/log/mariadb/mariadb.log

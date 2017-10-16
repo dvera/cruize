@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+
+# make clade table
+# awk -F '\t' -v clade="clade"  '
+# NR==1 {
+#   for (i=1; i<=NF; i++){
+#     ix[$i]=i
+#   }
+#   print "name","label","priority"}
+# NR>1  {
+#   if(!($ix[clade] in p)) {
+#     print $ix[clade], $ix[clade], NR; p[$ix[clade]]=$ix[clade]
+#   }
+# }' OFS='\t' /tmp/dbDb2.tsv > /tmp/clade.tsv
+echo "preparing clade"
+awk -F '\t' '{
+  if(NR==1){
+    for (i=1; i<=NF; i++){cols[$i]=i}
+    print "name","label","priority"
+  }
+  if(NR>1 && !seen[$cols["clade"]]){
+    print $cols["clade"], $cols["clade"], NR
+    seen[$cols["clade"]]++
+  }
+}' OFS='\t' /tmp/dbDb.tsv > /tmp/clade.tsv
+hgsql -e "delete from hgcentral.clade"
+hgsql -e "load data local infile \"/tmp/clade.tsv\" into table hgcentral.clade ignore 1 lines;"

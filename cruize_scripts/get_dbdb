@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+
+# get dbDb spreadsheet
+echo "downloading dbDb spreadsheet from https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key="$DBDBID"&hl=en&exportFormat=tsv"
+curl -sL "https://spreadsheets.google.com/feeds/download/spreadsheets/Export?key="$DBDBID"&hl=en&exportFormat=tsv" | \
+  tr -d "\r" | sed 's/^\t/NA\t/g' | sed 's/\t$/\tNA/g' | sed 's/\t\t/\tNA\t/g' | \
+  awk -F '\t' -v header=active  '
+  BEGIN {
+    split(header,cols,",")
+  }
+  {
+    if(NR==1){
+      for (i=1; i<=NF; i++){cols[$i]=i}
+      print $0
+    }
+    if(NR>1 && $cols["active"]==1){
+      print $0
+    }
+  }' OFS='\t' > /tmp/dbDb.tsv
+
+
+numGenomes=$(grep -v "^name" /tmp/dbDb.tsv | wc -l)
+echo "found" $numGenomes "activated genomes"
+if [ "$numGenomes" -lt 2 ]; then
+  exit 0
+fi
