@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+update_perms
+
+>&2 echo "table status before cleanup"
+hgsql -e "show table status"
+hgsql -e "SELECT table_name AS 'Table', round(((data_length + index_length) / 1024 / 1024), 2) as MB FROM information_schema.TABLES WHERE table_schema = 'hgcentral';"
+
+# Delete low usage
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=1"
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=2"
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=3"
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=4"
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=5"
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 7 and useCount=6"
+
+# Delete the zero time use rows which are often bot related
+hgsql -e "delete from hgcentral.userDb where to_days(firstUse) < to_days(now()) - 2 and useCount=0"
+hgsql -e "delete from hgcentral.sessionDb where to_days(lastUse) < to_days(now()) - 14"
+
+>&2 echo "table status after cleanup"
+hgsql -e "show table status"
+hgsql -e "SELECT table_name AS 'Table', round(((data_length + index_length) / 1024 / 1024), 2) as MB FROM information_schema.TABLES WHERE table_schema = 'hgcentral';"
