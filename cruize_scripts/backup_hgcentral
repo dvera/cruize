@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+mkdir -p /gbdb/mysql_dumps && mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral > /gbdb/mysql_dumps/hgcentral_$(date +"%Y-%m-%d_%H-%M-%S").dmp
+
