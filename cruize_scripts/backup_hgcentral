@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 mkdir -p /gbdb/mysql_dumps
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral sessionDb >      /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.sessionDb_$(date +"%Y-%m-%d_%H-%M-%S").dmp
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral namedSessionDb > /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.namedSessionDb_$(date +"%Y-%m-%d_%H-%M-%S").dmp
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral userDb >         /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.userDb_$(date +"%Y-%m-%d_%H-%M-%S").dmp
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral gbMembers >      /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.gbMembers_$(date +"%Y-%m-%d_%H-%M-%S").dmp
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral sessionDb       | gzip > /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.sessionDb_$(date +"%Y-%m-%d_%H-%M-%S").sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral namedSessionDb  | gzip > /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.namedSessionDb_$(date +"%Y-%m-%d_%H-%M-%S").sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral userDb          | gzip > /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.userDb_$(date +"%Y-%m-%d_%H-%M-%S").sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral gbMembers       | gzip > /gbdb/mysql_dumps/${BROWSERNAME}_hgcentral.gbMembers_$(date +"%Y-%m-%d_%H-%M-%S").sql.gz
 
