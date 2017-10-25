@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-nowdir=$(date +"%Y-%m-%d_%H-%M-%S")
+nowdir="${BROWSERNAME}_$(date +"%Y-%m-%d_%H-%M-%S")"
 
 mkdir -p /gbdb/mysql_dumps/$nowdir
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral sessionDb       | gzip > /gbdb/mysql_dumps/${nowdir}/${BROWSERNAME}_hgcentral.sessionDb.sql.gz
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral namedSessionDb  | gzip > /gbdb/mysql_dumps/${nowdir}/${BROWSERNAME}_hgcentral.namedSessionDb.sql.gz
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral userDb          | gzip > /gbdb/mysql_dumps/${nowdir}/${BROWSERNAME}_hgcentral.userDb.sql.gz
-mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral gbMembers       | gzip > /gbdb/mysql_dumps/${nowdir}/${BROWSERNAME}_hgcentral.gbMembers.sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral sessionDb       | gzip > /gbdb/mysql_dumps/${nowdir}/sessionDb.sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral namedSessionDb  | gzip > /gbdb/mysql_dumps/${nowdir}/namedSessionDb.sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral userDb          | gzip > /gbdb/mysql_dumps/${nowdir}/userDb.sql.gz
+mysqldump -hcruize_sql -u$SQL_USER -p$SQL_PASSWORD hgcentral gbMembers       | gzip > /gbdb/mysql_dumps/${nowdir}/gbMembers.sql.gz
 
