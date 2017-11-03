@@ -42,3 +42,6 @@ EMAILADDRESS=vera@genomics.fsu.edu
 
 # DEFAULTGENOME sets the genome loaded when users go straight to the browser
 DEFAULTGENOME=Zea mays
+
+# FORCE_HTTPS, when set to 1, forces https when users try to use http
+FORCE_HTTPS=0
