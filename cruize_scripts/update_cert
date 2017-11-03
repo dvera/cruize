@@ -32,9 +32,10 @@ if [[ $FQDN == *"."* ]]; then
     sed -i 's#^SSLCertificateKeyFile .*#SSLCertificateKeyFile /etc/pki/tls/private/key\.pem#g' /etc/httpd/conf.d/ssl.conf
     sed -i 's#^SSLCertificateChainFile .*#SSLCertificateChainFile /etc/pki/tls/private/chn\.pem#g' /etc/httpd/conf.d/ssl.conf
 
-    #force https
-    #echo -e 'RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]' >> /etc/httpd/conf/httpd.conf
-
+    if [ $FORCE_HTTPS -eq 1 ]; then
+      echo -e 'RewriteEngine On\nRewriteCond %{HTTPS} off\nRewriteRule ^/?(.*) https://%{SERVER_NAME}/$1 [R,L]' >> /etc/httpd/conf/httpd.conf
+    fi
+    
     apachectl -k graceful-stop
     sleep 2
     apachectl
