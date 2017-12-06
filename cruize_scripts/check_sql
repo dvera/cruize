@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+LES=1
+
+until [ $LES -eq 0 ]; do
+  hgsql -e "show databases" > /dev/null
+  LES=$?
+  sleep 2
+  echo "checking for access to cruize_sql..."
+done
+
+exit 0
