@@ -2,15 +2,17 @@
 
 echo "starting browser refresh..."
 
+# create .hg.conf for access to mysql server
 update_perms
+
+# check if fresh install configured for example data
 get_example_data
+
+# download dbDb spreadsheet
 get_dbdb
 
-until hgsql -e "show databases;"
-do
-  echo "Attempting to connect to database"
-  sleep 5
-done
+# wait for connection to mysql server
+check_sql
 
 update_dbDb
 update_clade
