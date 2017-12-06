@@ -21,13 +21,11 @@ The data for a UCSC genome browser is stored in a series of mysql databases incl
 ## requirements
 
 - [docker engine](https://www.docker.com/)
-
   ```bash
   curl -L https://get.docker.com | sh
   ```
 
 - [docker compose](https://www.docker.com/products/docker-compose) (optional)
-
   ```bash
   curl -L https://github.com/docker/compose/releases/download/1.8.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose && \
   chmod +x /usr/local/bin/docker-compose
@@ -36,13 +34,11 @@ The data for a UCSC genome browser is stored in a series of mysql databases incl
 ## get
 
 via git
-
 ```bash
 git clone https://github.com/dvera/cruize && cd cruize
 ```
 
 or grab the zipped source
-
 ```bash
 curl -Lo master.zip https://github.com/FSUgenomics/cruize/archive/master.zip && \
 unzip master.zip && \
@@ -52,7 +48,7 @@ mv cruize-master cruize
 
 ## use
 
-out of the box, cruize will download example data and setup a browser with this data.
+out of the box, cruize will download example data and setup a browser with this data. Refer to the docs to use your own genomes and tracks.
 
 with compose:
 ```bash
@@ -65,7 +61,6 @@ or without compose:
 ```
 
 with cloud-init:
-
 ```yaml
 #cloud-config
 package_upgrade: true
@@ -79,10 +74,6 @@ runcmd:
   - systemctl start docker
   - cd /root/cruize && docker-compose up
 ```
-
-## customize
-
-when cruize is first started, it checks to see if there is an existing database and genome data files, and downloads some example data if not. refer to the [docs](http://dvera.github.io/cruize) to customize cruize.
 
 ## license
 
