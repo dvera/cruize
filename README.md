@@ -43,12 +43,13 @@ or grab the zipped source
 curl -Lo master.zip https://github.com/FSUgenomics/cruize/archive/master.zip && \
 unzip master.zip && \
 rm -f master.zip && \
-mv cruize-master cruize
+mv cruize-master cruize && \
+cd cruize
 ```
 
 ## use
 
-out of the box, cruize will download example data and setup a browser with this data. Refer to the docs to use your own genomes and tracks.
+out of the box, cruize will download example data and setup a browser with this data. Refer to the docs to use your own genomes and tracks. After you start cruize, navigate to the public IP of the docker host in a web browser (or localhost if running on your workstation/laptop).
 
 with compose:
 ```bash
