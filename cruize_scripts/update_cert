@@ -5,9 +5,9 @@
 if [[ $FQDN == *"."* ]]; then
 
   if pgrep -x "httpd" > /dev/null; then
-    "APACHE ALREADY RUNNING"
+    echo "APACHE ALREADY RUNNING"
   else
-    "APACHE NOT RUNNING, STARTING..."
+    echo "APACHE NOT RUNNING, STARTING..."
     apachectl
     sleep 2
   fi
