@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [[ -e $PWD/www ]] ; then
+  >&2 echo "www directory already exists on host, please remove"
+  exit 1
+fi
+
+mkdir www
+
+docker run --rm -d \
+ --env-file browser_config \
+ -v $(pwd)/www:/www \
+ -v $(pwd)/cruize_scripts:/usr/local/bin \
+ vera/cruize_www cp -r /var/www/* /www
+ 
+ 
