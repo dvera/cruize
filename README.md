@@ -44,70 +44,24 @@ git clone https://github.com/dvera/cruize && cd cruize
 or grab the zipped source
 
 ```bash
-curl -Lo master.zip https://github.com/FSUgenomics/cruize/archive/master.zip && unzip master.zip && rm -f master.zip && mv cruize-master cruize
+curl -Lo master.zip https://github.com/FSUgenomics/cruize/archive/master.zip && \
+unzip master.zip && \
+rm -f master.zip && \
+mv cruize-master cruize
 ```
 
 ## use
 
-without customization, cruize will download example data and setup a browser with this custom data.
+out of the box, cruize will download example data and setup a browser with this data.
 
 with compose:
-
 ```bash
 docker-compose up
 ```
 
 or without compose:
-
 ```bash
-
-# create a bridge network for containers
-docker network create cruize_nw
-
-# -p 3306:3306 \
-# start database container
-docker run --rm -d \
- --name cruize_sql \
- -h cruize_sql \
- --env-file browser_config \
- -v $(pwd)/sql:/var/lib/mysql \
- -v $(pwd)/cruize_scripts:/usr/local/bin \
- --network cruize_nw \
- vera/cruize_sql
-
-# start webserver container
-docker run --rm -d \
- -p 80:80 \
- -p 443:443 \
- --name cruize_www \
- -h cruize_www \
- --env-file browser_config \
- -v $(pwd)/gbdb:/gbdb:ro \
- -v $(pwd)/cruize_scripts:/usr/local/bin \
- --network cruize_nw \
- vera/cruize_www
-
- # run blat container to update
-  docker run --rm -it \
-   --name cruize_blat \
-   -h cruizeblat \
-   --env-file browser_config \
-   -v $(pwd)/gbdb:/gbdb \
-   -v $(pwd)/cruize_scripts:/usr/local/bin \
-   --network cruize_nw \
-   vera/cruize_blat \
-   update_blat
-
-# run admin container to update
- docker run --rm -it \
-  --name cruize_admin \
-  -h cruize_admin \
-  --env-file browser_config \
-  -v $(pwd)/gbdb:/gbdb \
-  -v $(pwd)/cruize_scripts:/usr/local/bin \
-  --network cruize_nw \
-  vera/cruize_admin \
-  update_browser
+./embark
 ```
 
 with cloud-init:
@@ -126,24 +80,6 @@ runcmd:
   - cd /root/cruize && docker-compose up
 ```
 
-to run blat from a different computer without using docker:
-```bash
-
-# download gfServer if you don't already have (url to gfServer below assumes x86_64 architecture)
-mkdir -p ~/cruize/bin/
-curl -so ~/cruize/bin/gfServer http://hgdownload.cse.ucsc.edu/admin/exe/linux.x86_64/blat/gfServer
-chmod +x ~/cruize/bin/gfServer
-export PATH=${HOME}/cruize/bin:$PATH
-
-# define your google spreadsheet ID
-export DBDBID=1ilMW4gv8XsECFuKpSlOFWVhO_04qiogVdQHYYxQF2ZM
-
-# define browser URL/IP
-export FQDN=genomaize.us
-
-bash <(curl -s https://raw.githubusercontent.com/FSUgenomics/cruize_scripts/master/start_blat_dockerless)
-
-```
 ## customize
 
 when cruize is first started, it checks to see if there is an existing database and genome data files, and downloads some example data if not. refer to the [docs](http://dvera.github.io/cruize) to customize cruize.
