@@ -12,15 +12,16 @@ services:
     container_name: cruize_sql
     env_file:
     - browser_config
+    networks:
+    - cruize_nw
+    volumes:
+# change the next line to mount a different host directory for the mysql data dir
+    - ./sql:/var/lib/mysql
+    - ./cruize_scripts:/usr/local/bin
 # uncomment the next two lines to allow others to access the db
 #    ports:
 #    - "3306:3306"
-    volumes:
-      # change the next line to mount a different host directory for the mysql data dir
-    - ./sql:/var/lib/mysql
-    - ./cruize_scripts:/usr/local/bin
-    networks:
-    - cruize_nw
+
   cruize_www:
     image: vera/cruize_www
     #build:
@@ -32,23 +33,27 @@ services:
     - "80:80"
     - "443:443"
     volumes:
-    - /lustre/genomaize/gbdb:/gbdb:ro
+    - /gbdb:/gbdb:ro
     - ./cruize_scripts:/usr/local/bin
     networks:
     - cruize_nw
     depends_on:
     - cruize_sql
+
   cruize_admin:
     image: vera/cruize_admin
     container_name: cruize_admin
     env_file:
     - browser_config
     volumes:
-    - ./lustre/genomaize/gbdb:/gbdb:rw
+    - /gbdb:/gbdb:rw
+    - ./cruize_scripts:/usr/local/bin
     networks:
     - cruize_nw
     depends_on:
     - cruize_www
+    - cruize_sql
+
 # UNCOMMENT BELOW TO ENABLE BLAT ON THE SAME HOST RUNNING THE BROWSER
 #   MAKE SURE YOU HAVE ENOUGH RAM ON HOST (>500MByte/GBase for DNA, >1GB/GBase for Protein )
   # blat:
