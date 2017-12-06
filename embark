@@ -35,6 +35,9 @@ done
 
 shift $((OPTIND-1))
 
+
+docker network create cruize_nw
+
 # start database container
 
 docker run --rm -d \
