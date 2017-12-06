@@ -73,7 +73,7 @@ docker run --rm -d \
  -v $(pwd)/sql:/var/lib/mysql \
  -v $(pwd)/cruize_scripts:/usr/local/bin \
  --network cruize_nw \
- cruize_sql
+ vera/cruize_sql
 
 # start webserver container
 docker run --rm -d \
@@ -85,8 +85,7 @@ docker run --rm -d \
  -v $(pwd)/gbdb:/gbdb:ro \
  -v $(pwd)/cruize_scripts:/usr/local/bin \
  --network cruize_nw \
- cruize_www
-
+ vera/cruize_www
 
  # run blat container to update
   docker run --rm -it \
@@ -96,18 +95,18 @@ docker run --rm -d \
    -v $(pwd)/gbdb:/gbdb \
    -v $(pwd)/cruize_scripts:/usr/local/bin \
    --network cruize_nw \
-   cruize_blat \
+   vera/cruize_blat \
    update_blat
 
 # run admin container to update
  docker run --rm -it \
   --name cruize_admin \
-  -h cruizeadmin \
+  -h cruize_admin \
   --env-file browser_config \
   -v $(pwd)/gbdb:/gbdb \
   -v $(pwd)/cruize_scripts:/usr/local/bin \
   --network cruize_nw \
-  cruize_admin \
+  vera/cruize_admin \
   update_browser
 ```
 
