@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-
 echo "starting browser refresh..."
 
 update_perms
-get_gbdb
+get_example_data
 get_dbdb
 
 until hgsql -e "show databases;"
