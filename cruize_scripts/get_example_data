@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ ! "$(ls -A /gbdb)" ]] && [[ "$DBDBID" == "putExampleDbdbidHere" ]]; then
+  echo "no genome data found in /gbdb, downloading example data..."
+  mkdir -p /gbdb
+  cd /gbdb && \
+  wget -R '*html*'  -qcre robots=off -np -nH --cut-dirs=6 \
+  https://genome.ucsc.edu/goldenpath/help/examples/hubExamples/hubAssembly/plantAraTha1/araTha1/
+else
+  sleep 5
+fi
