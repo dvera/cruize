@@ -3,8 +3,6 @@
 usage() {
   echo "Usage: $(basename $0) [-b]" 1>&2
   echo "" 1>&2
-  echo "  bwaIndex can be a path to a bwa index prefix or a tarball of an bwa index" 1>&2
-  echo "" 1>&2
   echo "  -b        start blat container locally"
   exit 1
 }
